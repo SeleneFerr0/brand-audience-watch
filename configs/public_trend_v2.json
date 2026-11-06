@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "source": {
+    "dataset_id": "McAuley-Lab/Amazon-Reviews-2023/Subscription_Boxes",
+    "adapter": "amazon_reviews_jsonl",
+    "events_path": "data/raw/Subscription_Boxes.jsonl.gz",
+    "products_path": "data/raw/meta_Subscription_Boxes.jsonl.gz",
+    "target_unit": "published_reviews",
+    "coverage_end": "2023-08-31T00:00:00Z",
+    "invalid_policy": "error",
+    "limitations": ["Publication timestamp used as availability proxy; revisions unknown", "No unit sales, exposure or observed price-choice data", "Product snapshot availability unknown and excluded from historical task features"]
+  },
+  "task": {
+    "kind": "trend",
+    "horizon_weeks": 4,
+    "min_prior_events": 3,
+    "max_items": 150,
+    "numeric_attributes": [],
+    "max_text_chars": 8000
+  },
+  "backtest": {
+    "train_cutoffs": ["2020-01-06", "2020-04-06", "2020-07-06", "2020-10-05", "2021-01-04", "2021-04-05", "2021-07-05", "2021-10-04", "2022-01-03", "2022-04-04", "2022-07-04", "2022-10-03"],
+    "test_cutoffs": ["2021-07-05", "2022-01-03", "2022-07-04", "2023-01-02"]
+  },
+  "representations": ["numeric", "word_tfidf", "char_tfidf"],
+  "models": ["poisson", "negative_binomial", "hurdle", "quantile"],
+  "chronos": {
+    "enabled": true,
+    "python": ".venv/bin/python",
+    "model_id": "amazon/chronos-2",
+    "revision": "29ec3766d36d6f73f0696f85560a422f50e8498c",
+    "local_files_only": true,
+    "timeout_seconds": 150
+  },
+  "seed": 42
+}

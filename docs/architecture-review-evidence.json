@@ -1,0 +1,23 @@
+{
+  "review_date": "2026-11-05",
+  "reviewed_file": "src/brand_intel/cli.py",
+  "sha256": "a9ef0574037ef548a6463cd3f1d435d4fc3533384e8a69caa4b28f7d6f60b342",
+  "production_logic_changed": false,
+  "existing_tests_passed": 9,
+  "reproductions": {
+    "zero_forecast": {
+      "observations": 400,
+      "zero_fraction": 0.905,
+      "always_zero_mae": 0.125,
+      "recent_mean_mae": 0.18875,
+      "last_value_mae": 0.225
+    },
+    "stale_forecast_contract": {
+      "config_forecast_weeks": 8,
+      "actual_input_test_weeks": 4,
+      "reported_forecast_weeks": 8,
+      "unexpectedly_accepted": true
+    }
+  },
+  "scope": "public Amazon prototype only; no JD.com or Tmall data accessed"
+}

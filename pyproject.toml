@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brand-audience-intelligence"
+version = "0.2.0"
+description = "Public Amazon review-activity benchmark and brand research data contracts"
+requires-python = ">=3.12"
+dependencies = ["pandas>=2.2,<3", "numpy>=1.26,<3", "scikit-learn>=1.5,<2", "scipy>=1.12,<2"]
+
+[project.optional-dependencies]
+baseline = ["autogluon.tabular[lightgbm]>=1.6.3,<2"]
+choice = ["pymc>=5.20,<6", "arviz>=0.21,<1", "numpy>=2,<2.3", "numpyro>=0.19,<1", "jax>=0.4,<1"]
+forecast = ["chronos-forecasting>=2.3.2,<3", "torch>=2.2,<3"]
+
+[project.scripts]
+brand-intel = "brand_intel.v2:main"
+brand-intel-legacy = "brand_intel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

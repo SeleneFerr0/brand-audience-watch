@@ -1,0 +1,13 @@
+{
+  "features": ["price", "attribute"],
+  "holdout_fraction": 0.25,
+  "draws": 1000,
+  "tune": 1000,
+  "chains": 4,
+  "cores": 2,
+  "nuts_sampler": "numpyro",
+  "target_accept": 0.95,
+  "rhat_limit": 1.01,
+  "ess_min": 400,
+  "seed": 42
+}

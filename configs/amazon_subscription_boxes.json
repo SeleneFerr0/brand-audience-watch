@@ -1,0 +1,25 @@
+{
+  "dataset": "McAuley-Lab/Amazon-Reviews-2023",
+  "category": "Subscription_Boxes",
+  "reviews_url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/review_categories/Subscription_Boxes.jsonl.gz",
+  "metadata_url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories/meta_Subscription_Boxes.jsonl.gz",
+  "source_page": "https://amazon-reviews-2023.github.io/",
+  "license_status": "No explicit dataset license found on the inspected official card; review upstream terms before redistribution or commercial use.",
+  "target": "published_review_count_next_90d_NOT_sales",
+  "horizon_days": 90,
+  "train_cutoffs": [
+    "2020-01-01",
+    "2020-07-01",
+    "2021-01-01",
+    "2021-07-01"
+  ],
+  "validation_cutoff": "2022-01-01",
+  "test_cutoff": "2023-01-01",
+  "min_prior_reviews": 3,
+  "hit_quantile_train_only": 0.9,
+  "min_hit_reviews": 5,
+  "forecast_cutoff": "2023-01-02",
+  "forecast_weeks": 4,
+  "forecast_series": 100,
+  "seed": 42
+}

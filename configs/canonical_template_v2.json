@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "source": {
+    "dataset_id": "replace-with-public-source-id",
+    "adapter": "canonical_csv",
+    "events_path": "data/public/events.csv",
+    "products_path": "data/public/products.csv",
+    "target_unit": "events",
+    "coverage_end": "2023-08-31T00:00:00Z",
+    "invalid_policy": "error",
+    "event_columns": {},
+    "limitations": ["Set coverage, units and provenance for the actual source before use"]
+  },
+  "task": {"kind": "cold_start", "horizon_weeks": 4, "numeric_attributes": ["price", "size"], "max_text_chars": 8000},
+  "backtest": {"train_cutoffs": ["2020-01-06", "2020-07-06", "2021-01-04"], "test_cutoffs": ["2022-01-03", "2023-01-02"]},
+  "representations": ["numeric", "word_tfidf", "char_tfidf"],
+  "models": ["poisson", "negative_binomial", "hurdle", "quantile"],
+  "chronos": {"enabled": false},
+  "seed": 42
+}
