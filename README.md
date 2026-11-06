@@ -1,43 +1,86 @@
-# Brand Audience Intelligence
+# Brand Audience Watch
 
-面向品牌的人群偏好、产品机会与新品需求研究平台。本仓库独立安装和运行，只使用公开 Amazon 数据进行实测；不接入 JD.com / Tmall 机密数据。
+A research platform for understanding product trends, evaluating new product concepts, and modeling consumer preferences. It helps brand and product teams compare forecasting methods using traceable data and reproducible evaluations.
 
-当前主入口为 v0.2：可更换数据源、趋势与冷启动任务、滚动回测、概率模型比较、分层消费者偏好。Amazon 评论数量是评论活动指标，不代表销量。
+**Current release: 0.2.0 · Python 3.12+**
 
-## 开始运行
+The current benchmark uses public Amazon Reviews data. Its forecasting target is published review activity; predicting unit sales requires suitable transaction data.
+
+## Capabilities
+
+- **Flexible data integration:** source adapters, configurable column mappings, and shared event and product schemas support additional datasets.
+- **Separate research tasks:** trend forecasting for products with observed histories, and cold-start evaluation for new products with attributes available at the prediction date.
+- **Probabilistic forecasting:** compare Poisson, Negative Binomial, two-stage hurdle, and quantile models against zero, last-week, and recent-average baselines.
+- **Text and product representations:** compare numeric features with word and character TF-IDF, while retaining review text, product attributes, and evidence references.
+- **Consumer preference modeling:** hierarchical random coefficients, validation on entirely held-out consumers, and sampling convergence diagnostics.
+- **Reproducible experiments:** versioned data builds, configuration and content hashes, rolling backtests, code snapshots, and explicit run status.
+
+## Validation status
+
+The current implementation passes **34 regression and integration tests**. The public Amazon benchmark includes **four rolling folds and 60 method–fold evaluations**.
+
+The cold-start workflow and hierarchical preference model have been validated with synthetic fixtures. Real-world evaluation requires historical product catalog versions and observed consumer choice experiments. Convergence diagnostics and synthetic results establish implementation checks, rather than evidence of market performance.
+
+A Chronos-2 adapter uses the same weekly forecasting task as the other models. Model weights were unavailable during the benchmark, so Chronos results are pending.
+
+## Quick start
+
+From the repository directory, install the core package in a dedicated environment:
 
 ```sh
 uv venv --python 3.12 .venv-baseline
 uv pip install --python .venv-baseline/bin/python -e .
-# 已有项目公开数据：data/raw/Subscription_Boxes.jsonl.gz 和 meta_Subscription_Boxes.jsonl.gz
-.venv-baseline/bin/brand-intel data-build --spec configs/public_trend_v2.json
-.venv-baseline/bin/brand-intel backtest --spec configs/public_trend_v2.json
-.venv-baseline/bin/python -B -m unittest discover -s tests -v
 ```
 
-首次获取该公开类别的数据，可使用保留的下载入口：
+Download the public Amazon Subscription Boxes reviews and product metadata:
 
 ```sh
 .venv-baseline/bin/brand-intel-legacy download
 .venv-baseline/bin/brand-intel-legacy download --metadata
 ```
 
-默认数据目录及输出目录相对于当前目录。也可在子命令前传 `--root /path/to/project`。每次执行生成独立的 `runs/v2/<run-id>/`，请先检查 `state.json`，再读取成绩。未安装或未下载的 Chronos 会显示为 unavailable，不会生成替代成绩。
+Build the versioned dataset, run the benchmark, and check the test suite:
 
-## 文档与接口
+```sh
+.venv-baseline/bin/brand-intel data-build --spec configs/public_trend_v2.json
+.venv-baseline/bin/brand-intel backtest --spec configs/public_trend_v2.json
+.venv-baseline/bin/python -B -m unittest discover -s tests -v
+```
 
-- [v2 使用说明、数据契约与模型定义](docs/v2-implementation.md)
-- [v2 实测结果与剩余限制](docs/v2-validation-results.md)
-- 数据源模板：[canonical_template_v2.json](configs/canonical_template_v2.json)
-- 选择实验配置：[hierarchical_preferences.json](configs/hierarchical_preferences.json)
-- CSV 表头模板：[events](data_templates/events_v2.csv)、[products](data_templates/products_v2.csv)、[choices](data_templates/choices_v2.csv)
-- 原架构评审：[改进方案](docs/architecture-review-and-improvement-plan.md)
-- 前期调研：[爆品预测实践与优先仓库](docs/hit-product-best-practices-and-top-repositories.md)、[业界实践](docs/industry-research.md)
+Paths are relative to the current directory. To use a different project directory, pass `--root /path/to/project` before the subcommand.
 
-AutoGluon 的原历史基线保留在 `brand-intel-legacy`，旧报告和旧 CLI 是历史记录。v2 的模型比较采用相同周级目标、候选产品、预测时点与预测长度，不能直接与旧的整段计数 MAE 比大小。
+Each experiment creates a separate `runs/v2/<run-id>/` directory. Check `state.json` before interpreting its scores: unavailable backends and insufficient evidence are recorded explicitly.
 
-## 运行环境
+## Bring your own data
 
-数值回测、PyMC 偏好和 Chronos 分别使用虚拟环境，避免混用 LightGBM/PyTorch 原生库。验证过的环境见 `requirements-baseline.lock.txt` 与 `requirements-choice.lock.txt`。主安装不要求 AutoGluon、PyMC 或 Torch；分别通过 `.[baseline]`、`.[choice]`、`.[forecast]` 安装。
+Start with the [data source configuration template](configs/canonical_template_v2.json) and the CSV headers for [events](data_templates/events_v2.csv), [product versions](data_templates/products_v2.csv), and [consumer choices](data_templates/choices_v2.csv).
 
-本版本实现研究评估模块。真实新品的销售预测仍需要有历史版本的目录、销售与曝光记录以及真实选择实验；采样收敛或合成数据结果不能替代这些证据。
+Event and product records include timestamps for when information became available, along with evidence references. These fields allow historical evaluations to use only information known at each prediction date. Configure the target unit, observation coverage, product attributes, and evaluation periods for your dataset.
+
+Consumer preference studies use the [hierarchical preference configuration](configs/hierarchical_preferences.json). Choice observations must identify the alternatives offered, the selected option, and an outside option. Sales forecasting for new concepts also requires appropriate sales, exposure, price, and availability data.
+
+## Optional models and environments
+
+The core installation does not require AutoGluon, PyMC, or PyTorch. Install optional components in separate environments:
+
+| Component | Installation extra | Purpose |
+|---|---|---|
+| AutoGluon | `.[baseline]` | Original historical baseline through the legacy CLI |
+| PyMC / NumPyro | `.[choice]` | Hierarchical consumer preferences |
+| Chronos / PyTorch | `.[forecast]` | Optional time-series comparison |
+
+Keep numerical benchmarks, preference sampling, and Chronos in separate virtual environments to avoid native-library conflicts. Validated environment snapshots are available in [requirements-baseline.lock.txt](requirements-baseline.lock.txt) and [requirements-choice.lock.txt](requirements-choice.lock.txt).
+
+The primary CLI is `brand-intel`. The original AutoGluon workflow remains available through `brand-intel-legacy`. Its target periods differ from the current weekly benchmark, so their MAE scores are not directly comparable.
+
+## Research documentation
+
+The detailed research documents below are currently in Chinese:
+
+- [Implementation guide, data contracts, and model definitions](docs/v2-implementation.md)
+- [Benchmark results and current limitations](docs/v2-validation-results.md)
+- [Architecture review and improvement plan](docs/architecture-review-and-improvement-plan.md)
+- [Product opportunity research and repository shortlist](docs/hit-product-best-practices-and-top-repositories.md)
+- [Industry research](docs/industry-research.md)
+
+This release provides research and evaluation modules. Validating demand for a product that has not launched requires suitable study design, representative consumer evidence, and external market validation.
